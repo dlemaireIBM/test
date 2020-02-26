@@ -1,0 +1,56 @@
+---
+- name: Add line in sudoers
+  hosts: Local
+  vars:
+    usersudo: [dlemaire, automation]
+  tasks:
+  - name: modify line in sudoers for no passwd 
+    lineinfile:
+      state: present
+      path: /etc/sudoers
+      regexp: '^root'
+      line: "root    ALL=(ALL:ALL)       NOPASSWD:ALL"
+  - name: modify sshd configuration
+    lineinfile:
+      state: present
+      path: /etc/ssh/sshd_config
+      regexp: '^#PubKey'
+      line: "PubkeyAuthentication yes"
+    notify:
+    - restart_sshd
+  - name: modify sshd configuration
+    lineinfile:
+      state: present
+      path: /etc/ssh/sshd_config
+      regexp: '^#PermitRoot'
+      line: "PermitRootLogin  yes"
+    notify:
+    - restart_sshd
+  - name: add file per user in sudoers.d
+    lineinfile:
+      state: present
+      create: yes
+      path: /etc/sudoers.d/{{item}}
+      line: "{{item}}    ALL=(ALL:ALL)       NOPASSWD:ALL"
+    loop:
+      "{{usersudo}}"
+  - name: add user automation
+    user:
+      name: "{{item}}"
+      password: "{{item}}"
+      state: present
+    loop:
+      "{{usersudo}}"
+  - name: authorized key
+    authorized_key:
+      user: "{{item}}"
+      state: present
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5MmpAqWzhCstwCgcKZsUpsjjZ9w5bRa2LOvg6h4fX2c4a+vdYIsqow8exPLpfrDVoS2YESdxkm8DC5YkgcB4eACIpOnTeWp4E95bQuzAexvDgqMmKmqu2XmWVFo6GSoGDxYEW5PV6Wx5ytUvANFsBD0cPuBEzLTYsmP7J8G2sziLTmw+b3lgZjPEgnksSxndZLQBPJcXuRTcooQ3BTMQ0kweNUEGSJFMF6THAMdgWyLJ8rfxPbilE6KPuDJsdx6ysye2NMIoF40ElxMYOo4x43ARYpFfiIcO/+CxjczyI4wJ7jsZ9JnAlZHSKF19NY/iBFAHRVzuBQ2rrjL334AML root@ubuntu"
+      path: /home/{{item}}/.ssh/authorized_keys
+    loop:
+      "{{usersudo}}"
+  handlers:
+  - name: restart_sshd
+    service:
+      name: sshd
+      state: restarted

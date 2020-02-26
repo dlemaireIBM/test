@@ -1,0 +1,4 @@
+---
+- hosts: Server
+  roles:
+    - { role: ansible-linux-http-server }

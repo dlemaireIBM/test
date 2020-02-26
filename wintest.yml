@@ -1,0 +1,15 @@
+---
+- hosts: ICWindows
+  become: no
+
+  tasks:
+    - name: create file
+      win_file: 
+        path: c:\toto
+        state: directory
+    - name: create file
+      win_file:	
+        path: c:\toto\titi.txt
+        state: touch 
+
+

@@ -1,0 +1,16 @@
+---
+- hosts: IC
+  gather_facts: no
+  tasks:
+    - name: verif os
+      setup:
+      register: toto
+    - name: affiche
+      debug:
+        var: toto.ansible_facts.ansible_distribution
+    - name: ping selon os
+      ping:
+      when: ansible_facts['os_family'] == "RedHat"
+    - name: ping windows
+      win_ping:
+      when: ansible_facts['os_family'] ==  "Windows"

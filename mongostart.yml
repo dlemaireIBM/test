@@ -1,0 +1,12 @@
+---
+- hosts: wintest
+  become: no
+
+  vars:
+    arg: --bind_ip 10.0.2.5
+
+  tasks:
+  - name: restart mongodb
+    win_service: 
+      name: mongodb
+      state: started

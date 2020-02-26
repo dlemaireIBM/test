@@ -1,0 +1,17 @@
+---
+- hosts: Server
+  become: no
+  gather_facts: yes
+
+  vars:
+    mongodb_parameters:
+      #mandatory parameters
+      database: 'titi'
+      #optional
+      collection: "inventory"
+      connection_string: "mongodb://10.0.2.5:27017/"
+
+  tasks:
+    - debug: msg="Mongo has already started with the following PID [{{ item.pid }}]"
+      with_mongodb: "{{mongodb_parameters}}"
+ 
